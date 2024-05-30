@@ -59,13 +59,10 @@ st.caption('Created By: Kevin Vo :sunglasses:')
 def find_block_name_by_ticker(ticker):
     for block_dict in all_dicts:
         if ticker in block_dict:
-            # Identify the block name based on the global variable matching the block_dict
             for name, block in globals().items():
                 if block is block_dict and name.startswith('block'):
                     return name
     return None
-
-
 
 # User input
 user_input = st.text_area("Please enter tickers(Comma-Separated Or List): ")
@@ -74,40 +71,34 @@ user_input = st.text_area("Please enter tickers(Comma-Separated Or List): ")
 if user_input:
     user_input_normalized = user_input.replace('\r\n', '\n').replace('\r', '\n')
     
-    # First split by newline, then check each line for commas and split further if needed
     tickers = [ticker.strip() for line in user_input_normalized.split('\n') for ticker in line.split(',') if ticker.strip()]
     processed_blocks = set()
     block_ticker_data = {}
-    bad_tickers = []  # List to collect bad tickers
+    bad_tickers = [] 
 
     for ticker in tickers:
         block_name = find_block_name_by_ticker(ticker)
         if block_name:
             ticker_data = get_data_by_ticker(ticker)
             if ticker_data:
-                # Collecting ticker data under its block name
                 if block_name not in block_ticker_data:
                     block_ticker_data[block_name] = []
                 block_ticker_data[block_name].extend(ticker_data)
         else:
-            # If the ticker does not belong to any block, it's considered bad. Appending to the list.
             bad_tickers.append(ticker)
             
     if bad_tickers:
          with st.container():
             st.error(f"**INVAILD TICKERS ENTERED:** {', '.join(bad_tickers)}")
     
-    # Display the information for valid tickers
     for block_name, data in block_ticker_data.items():
-        for info in data:
-        # 'info' contains the value you want to display in bold. This correlates to the fund name (Tickers.py)   
-                st.markdown(f"**{info}**")  # This makes the text bold
+        for info in data:  
+                st.markdown(f"**{info}**")  
         if block_name not in processed_blocks:
             if block_name in block_name_to_function:
                 block_name_to_function[block_name]()
                 processed_blocks.add(block_name)
 
-        # Check and display block signature if not already processed
         if block_name not in processed_blocks:
             if block_name in block_name_to_function:
                 block_name_to_function[block_name]()
